@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Stock68 Customer Survey</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;background:#0a0f0d;color:#e8f0ec;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 16px}
+  .logo-wrap{margin-bottom:32px;text-align:center}
+  .logo-wrap img{height:48px;object-fit:contain}
+  .logo-fallback{font-size:26px;font-weight:700;color:#2ec4a0;letter-spacing:-0.5px;display:none}
+  .card{background:#111a16;border:1px solid #1e3329;border-radius:16px;width:100%;max-width:680px;padding:40px 44px;box-shadow:0 8px 40px rgba(0,0,0,0.4)}
+  h1{font-size:22px;font-weight:700;color:#fff;margin-bottom:6px}
+  .subtitle{font-size:14px;color:#7a9e8e;margin-bottom:32px;line-height:1.6}
+  .progress-bar{height:4px;background:#1e3329;border-radius:99px;margin-bottom:36px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,#2ec4a0,#1a9e80);border-radius:99px;transition:width 0.4s ease}
+  .step{display:none}.step.active{display:block}
+  .step-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#2ec4a0;margin-bottom:20px}
+  .q-block{margin-bottom:28px}
+  .q-text{font-size:15px;font-weight:500;color:#d4ebe0;margin-bottom:14px;line-height:1.5}
+  .q-sub{font-size:12px;color:#7a9e8e;margin-top:-10px;margin-bottom:14px}
+  .options{display:flex;flex-direction:column;gap:10px}
+  .opt{display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid #1e3329;border-radius:10px;cursor:pointer;transition:all 0.2s;background:#0d1710}
+  .opt:hover{border-color:#2ec4a0;background:#0f201a}
+  .opt.selected{border-color:#2ec4a0;background:#0f2820;box-shadow:0 0 0 1px #2ec4a0}
+  .opt input[type=radio],.opt input[type=checkbox]{accent-color:#2ec4a0;width:16px;height:16px;flex-shrink:0}
+  .opt label{font-size:14px;color:#c8e0d4;cursor:pointer;line-height:1.4}
+  .rating-row{display:flex;gap:8px;flex-wrap:wrap}
+  .rating-btn{width:44px;height:44px;border-radius:10px;border:1px solid #1e3329;background:#0d1710;color:#7a9e8e;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center}
+  .rating-btn:hover{border-color:#2ec4a0;color:#2ec4a0}
+  .rating-btn.selected{background:#2ec4a0;border-color:#2ec4a0;color:#0a0f0d}
+  .rating-labels{display:flex;justify-content:space-between;margin-top:6px}
+  .rating-labels span{font-size:11px;color:#7a9e8e}
+  textarea{width:100%;background:#0d1710;border:1px solid #1e3329;border-radius:10px;color:#d4ebe0;font-family:'Inter',sans-serif;font-size:14px;padding:14px;resize:vertical;min-height:100px;outline:none;transition:border 0.2s}
+  textarea:focus{border-color:#2ec4a0}
+  textarea::placeholder{color:#3a5a4a}
+  .nav{display:flex;justify-content:space-between;align-items:center;margin-top:36px;padding-top:24px;border-top:1px solid #1e3329}
+  .btn{padding:12px 28px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;border:none}
+  .btn-primary{background:#2ec4a0;color:#0a0f0d}
+  .btn-primary:hover{background:#35d9b3}
+  .btn-ghost{background:transparent;color:#7a9e8e;border:1px solid #1e3329}
+  .btn-ghost:hover{border-color:#2ec4a0;color:#2ec4a0}
+  .btn-danger{background:transparent;color:#e05555;border:1px solid #3a1e1e;font-size:12px;padding:6px 14px}
+  .btn-danger:hover{background:#1e0f0f;border-color:#e05555}
+  .step-counter{font-size:13px;color:#7a9e8e}
+  .thank-you{text-align:center;padding:20px 0}
+  .thank-you .check{width:64px;height:64px;background:#0f2820;border:2px solid #2ec4a0;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:28px}
+  .thank-you h2{font-size:22px;font-weight:700;color:#fff;margin-bottom:10px}
+  .thank-you p{font-size:14px;color:#7a9e8e;line-height:1.7}
+  .modules-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  /* Admin panel */
+  #admin-toggle{position:fixed;bottom:20px;right:20px;background:#1e3329;border:1px solid #2ec4a0;color:#2ec4a0;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;z-index:100}
+  #admin-panel{display:none;width:100%;max-width:680px;margin-top:24px}
+  #admin-panel.open{display:block}
+  .admin-card{background:#111a16;border:1px solid #1e3329;border-radius:16px;padding:28px 32px}
+  .admin-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+  .admin-header h2{font-size:16px;font-weight:700;color:#fff}
+  .admin-header span{font-size:12px;color:#7a9e8e}
+  .submission{background:#0d1710;border:1px solid #1e3329;border-radius:10px;padding:16px;margin-bottom:12px}
+  .sub-meta{font-size:11px;color:#7a9e8e;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+  .sub-row{font-size:13px;color:#c8e0d4;margin-bottom:5px;line-height:1.5}
+  .sub-row strong{color:#2ec4a0;font-weight:500}
+  .empty-state{text-align:center;padding:32px;color:#7a9e8e;font-size:14px}
+  .badge{background:#0f2820;border:1px solid #2ec4a0;color:#2ec4a0;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px}
+  .saving-indicator{font-size:12px;color:#7a9e8e;text-align:center;margin-top:12px;min-height:18px}
+  @media(max-width:500px){.card{padding:28px 20px}.modules-grid{grid-template-columns:1fr}.rating-btn{width:38px;height:38px}.admin-card{padding:20px 16px}}
+</style>
+</head>
+<body>
+
+<div class="logo-wrap">
+  <img src="https://framerusercontent.com/images/S0NUzMbjo3ScLhLUn5Amb7SB9BU.png" alt="Stock68" id="logo" onerror="this.style.display='none';document.getElementById('logo-fb').style.display='block'"/>
+  <div class="logo-fallback" id="logo-fb">Stock68</div>
+</div>
+
+<div class="card">
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:20%"></div></div>
+
+  <!-- STEP 1 -->
+  <div class="step active" id="step-1">
+    <div class="step-label">Section 1 of 5 — About You</div>
+    <h1>Customer Satisfaction Survey</h1>
+    <p class="subtitle">Help us improve Stock68 by sharing your experience. This survey takes approximately 3–4 minutes.</p>
+    <div class="q-block">
+      <div class="q-text">1. How long have you been using Stock68?</div>
+      <div class="options" id="q1">
+        <label class="opt"><input type="radio" name="q1" value="Less than 3 months"/><label>Less than 3 months</label></label>
+        <label class="opt"><input type="radio" name="q1" value="3–6 months"/><label>3–6 months</label></label>
+        <label class="opt"><input type="radio" name="q1" value="6–12 months"/><label>6–12 months</label></label>
+        <label class="opt"><input type="radio" name="q1" value="More than 1 year"/><label>More than 1 year</label></label>
+      </div>
+    </div>
+    <div class="q-block">
+      <div class="q-text">2. Which modules do you actively use?</div>
+      <p class="q-sub">Select all that apply.</p>
+      <div class="options modules-grid" id="q2">
+        <label class="opt"><input type="checkbox" name="q2" value="Order Management"/><label>Order Management</label></label>
+        <label class="opt"><input type="checkbox" name="q2" value="Inventory Tracking"/><label>Inventory Tracking</label></label>
+        <label class="opt"><input type="checkbox" name="q2" value="Distribution Management"/><label>Distribution Management</label></label>
+        <label class="opt"><input type="checkbox" name="q2" value="Integrated Accounting"/><label>Integrated Accounting</label></label>
+        <label class="opt"><input type="checkbox" name="q2" value="Dashboard & Analytics"/><label>Dashboard & Analytics</label></label>
+        <label class="opt"><input type="checkbox" name="q2" value="CoCaptain AI"/><label>CoCaptain AI</label></label>
+      </div>
+    </div>
+    <div class="nav">
+      <span class="step-counter">Step 1 of 5</span>
+      <button class="btn btn-primary" onclick="goTo(2)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="step-2">
+    <div class="step-label">Section 2 of 5 — Overall Experience</div>
+    <h1>Overall Experience</h1>
+    <p class="subtitle">Tell us how Stock68 is performing for your business overall.</p>
+    <div class="q-block">
+      <div class="q-text">3. How satisfied are you with Stock68 overall?</div>
+      <div class="rating-row" id="q3"></div>
+      <div class="rating-labels"><span>Very Dissatisfied</span><span>Very Satisfied</span></div>
+    </div>
+    <div class="q-block">
+      <div class="q-text">4. How likely are you to recommend Stock68 to another distributor?</div>
+      <div class="rating-row" id="q4"></div>
+      <div class="rating-labels"><span>Not at all likely</span><span>Extremely likely</span></div>
+    </div>
+    <div class="q-block">
+      <div class="q-text">5. How has Stock68 impacted your operations?</div>
+      <div class="options" id="q5">
+        <label class="opt"><input type="radio" name="q5" value="Significantly improved"/><label>Significantly improved efficiency and saved time</label></label>
+        <label class="opt"><input type="radio" name="q5" value="Somewhat improved"/><label>Somewhat improved our processes</label></label>
+        <label class="opt"><input type="radio" name="q5" value="Neutral"/><label>No noticeable change yet</label></label>
+        <label class="opt"><input type="radio" name="q5" value="Needs improvement"/><label>We are still working through implementation challenges</label></label>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="goTo(1)">← Back</button>
+      <span class="step-counter">Step 2 of 5</span>
+      <button class="btn btn-primary" onclick="goTo(3)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" id="step-3">
+    <div class="step-label">Section 3 of 5 — Product Features</div>
+    <h1>Product Features</h1>
+    <p class="subtitle">Rate the following features of the Stock68 platform.</p>
+    <div class="q-block">
+      <div class="q-text">6. Ease of use and navigation</div>
+      <div class="rating-row" id="q6"></div>
+      <div class="rating-labels"><span>Very Difficult</span><span>Very Easy</span></div>
+    </div>
+    <div class="q-block">
+      <div class="q-text">7. Quality and accuracy of AI-powered features (CoCaptain, inventory predictions, routing)</div>
+      <div class="rating-row" id="q7"></div>
+      <div class="rating-labels"><span>Very Poor</span><span>Excellent</span></div>
+    </div>
+    <div class="q-block">
+      <div class="q-text">8. Speed and reliability of the platform</div>
+      <div class="rating-row" id="q8"></div>
+      <div class="rating-labels"><span>Very Poor</span><span>Excellent</span></div>
+    </div>
+    <div class="q-block">
+      <div class="q-text">9. Reporting and analytics capabilities</div>
+      <div class="rating-row" id="q9"></div>
+      <div class="rating-labels"><span>Very Poor</span><span>Excellent</span></div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="goTo(2)">← Back</button>
+      <span class="step-counter">Step 3 of 5</span>
+      <button class="btn btn-primary" onclick="goTo(4)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" id="step-4">
+    <div class="step-label">Section 4 of 5 — Support & Onboarding</div>
+    <h1>Support & Onboarding</h1>
+    <p class="subtitle">Your feedback on setup and ongoing support helps us serve you better.</p>
+    <div class="q-block">
+      <div class="q-text">10. How smooth was your onboarding and initial setup experience?</div>
+      <div class="rating-row" id="q10"></div>
+      <div class="rating-labels"><span>Very Difficult</span><span>Very Smooth</span></div>
+    </div>
+    <div class="q-block">
+      <div class="q-text">11. How responsive and helpful is the Stock68 support team?</div>
+      <div class="rating-row" id="q11"></div>
+      <div class="rating-labels"><span>Very Poor</span><span>Excellent</span></div>
+    </div>
+    <div class="q-block">
+      <div class="q-text">12. How would you rate the quality of training materials and documentation?</div>
+      <div class="options" id="q12">
+        <label class="opt"><input type="radio" name="q12" value="Excellent"/><label>Excellent — comprehensive and easy to follow</label></label>
+        <label class="opt"><input type="radio" name="q12" value="Good"/><label>Good — covers most of what I need</label></label>
+        <label class="opt"><input type="radio" name="q12" value="Fair"/><label>Fair — some gaps but usable</label></label>
+        <label class="opt"><input type="radio" name="q12" value="Poor"/><label>Poor — needs significant improvement</label></label>
+      </div>
+    </div>
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="goTo(3)">← Back</button>
+      <span class="step-counter">Step 4 of 5</span>
+      <button class="btn btn-primary" onclick="goTo(5)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step" id="step-5">
+    <div class="step-label">Section 5 of 5 — Open Feedback</div>
+    <h1>Your Thoughts</h1>
+    <p class="subtitle">Please share anything else that would help us improve Stock68 for you.</p>
+    <div class="q-block">
+      <div class="q-text">13. What do you like most about Stock68?</div>
+      <textarea id="q13" placeholder="e.g. The AI order processing has saved us hours every week..."></textarea>
+    </div>
+    <div class="q-block">
+      <div class="q-text">14. What could be improved or is currently missing?</div>
+      <textarea id="q14" placeholder="e.g. We'd love better integration with our existing invoicing system..."></textarea>
+    </div>
+    <div class="q-block">
+      <div class="q-text">15. Any additional comments or suggestions?</div>
+      <textarea id="q15" placeholder="Anything else you'd like us to know..."></textarea>
+    </div>
+    <div class="nav">
+      <button class="btn btn-ghost" onclick="goTo(4)">← Back</button>
+      <span class="step-counter">Step 5 of 5</span>
+      <button class="btn btn-primary" onclick="submitSurvey()">Submit Survey ✓</button>
+    </div>
+    <div class="saving-indicator" id="saving-msg"></div>
+  </div>
+
+  <!-- THANK YOU -->
+  <div class="step" id="step-done">
+    <div class="thank-you">
+      <div class="check">✓</div>
+      <h2>Thank You for Your Feedback</h2>
+      <p>Your responses have been saved and will help us build a faster, smarter food supply chain for distributors like you.<br><br>
+      If you have any urgent questions, reach us at <a href="mailto:info@stock68.com" style="color:#2ec4a0">info@stock68.com</a>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Panel -->
+<div id="admin-panel">
+  <div class="admin-card">
+    <div class="admin-header">
+      <h2>Submissions</h2>
+      <span id="sub-count" class="badge">0 responses</span>
+    </div>
+    <div id="submissions-list"><div class="empty-state">No submissions yet.</div></div>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-danger" onclick="clearAll()">Clear All</button>
+      <button class="btn btn-ghost" style="font-size:12px;padding:6px 14px" onclick="exportCSV()">Export CSV</button>
+    </div>
+  </div>
+</div>
+
+<button id="admin-toggle" onclick="toggleAdmin()">📋 View Submissions</button>
+
+<script>
+  const totalSteps = 5;
+  let current = 1;
+
+  // Build rating rows
+  ['q3','q4','q6','q7','q8','q9','q10','q11'].forEach(id => {
+    const el = document.getElementById(id);
+    for(let i=1;i<=10;i++){
+      const b = document.createElement('button');
+      b.className='rating-btn';
+      b.textContent=i;
+      b.dataset.id=id;
+      b.dataset.val=i;
+      b.onclick=()=>{
+        el.querySelectorAll('.rating-btn').forEach(x=>x.classList.remove('selected'));
+        b.classList.add('selected');
+      };
+      el.appendChild(b);
+    }
+  });
+
+  // Style radio/checkbox opts
+  document.querySelectorAll('.opt input').forEach(inp=>{
+    inp.addEventListener('change',()=>{
+      if(inp.type==='radio'){
+        document.querySelectorAll(`input[name="${inp.name}"]`).forEach(r=>{
+          r.closest('.opt').classList.remove('selected');
+        });
+      }
+      inp.closest('.opt').classList.toggle('selected', inp.checked);
+    });
+  });
+
+  function goTo(n){
+    document.getElementById('step-'+current).classList.remove('active');
+    current=n;
+    const id = n<=totalSteps ? 'step-'+n : 'step-done';
+    document.getElementById(id).classList.add('active');
+    document.getElementById('progress').style.width=(Math.min(n/totalSteps,1)*100)+'%';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function collectData(){
+    const get = (name,multi=false) => {
+      if(multi){
+        return [...document.querySelectorAll(`input[name="${name}"]:checked`)].map(i=>i.value).join(', ') || '—';
+      }
+      const el = document.querySelector(`input[name="${name}"]:checked`);
+      return el ? el.value : '—';
+    };
+    const rating = id => {
+      const sel = document.querySelector(`#${id} .rating-btn.selected`);
+      return sel ? sel.dataset.val : '—';
+    };
+    return {
+      timestamp: new Date().toLocaleString(),
+      q1: get('q1'),
+      q2: get('q2',true),
+      q3: rating('q3'),
+      q4: rating('q4'),
+      q5: get('q5'),
+      q6: rating('q6'),
+      q7: rating('q7'),
+      q8: rating('q8'),
+      q9: rating('q9'),
+      q10: rating('q10'),
+      q11: rating('q11'),
+      q12: get('q12'),
+      q13: document.getElementById('q13').value || '—',
+      q14: document.getElementById('q14').value || '—',
+      q15: document.getElementById('q15').value || '—',
+    };
+  }
+
+  async function submitSurvey(){
+    const msg = document.getElementById('saving-msg');
+    msg.textContent = 'Saving your responses…';
+    const data = collectData();
+    const key = 'submission:' + Date.now();
+    try {
+      await window.storage.set(key, JSON.stringify(data), true);
+      msg.textContent = '✓ Saved successfully!';
+      setTimeout(()=>{
+        document.getElementById('step-5').classList.remove('active');
+        document.getElementById('step-done').classList.add('active');
+        document.getElementById('progress').style.width='100%';
+        window.scrollTo({top:0,behavior:'smooth'});
+        loadSubmissions();
+      }, 600);
+    } catch(e) {
+      msg.textContent = '⚠ Could not save. Please try again.';
+      console.error(e);
+    }
+  }
+
+  async function loadSubmissions(){
+    const list = document.getElementById('submissions-list');
+    const countEl = document.getElementById('sub-count');
+    try {
+      const keys = await window.storage.list('submission:', true);
+      const all = keys.keys || [];
+      countEl.textContent = all.length + ' response' + (all.length!==1?'s':'');
+      if(!all.length){ list.innerHTML='<div class="empty-state">No submissions yet.</div>'; return; }
+      list.innerHTML='';
+      const labels = ['Usage duration','Modules used','Overall satisfaction','Likelihood to recommend','Operational impact','Ease of use','AI features','Speed & reliability','Reporting & analytics','Onboarding experience','Support quality','Training materials','Likes most','Needs improvement','Additional comments'];
+      const sorted = [...all].sort((a,b)=>b.localeCompare(a));
+      for(const k of sorted){
+        try {
+          const r = await window.storage.get(k, true);
+          const d = JSON.parse(r.value);
+          const vals = [d.q1,d.q2,d.q3,d.q4,d.q5,d.q6,d.q7,d.q8,d.q9,d.q10,d.q11,d.q12,d.q13,d.q14,d.q15];
+          const div = document.createElement('div');
+          div.className='submission';
+          div.innerHTML=`<div class="sub-meta"><span>${d.timestamp}</span><button class="btn btn-danger" onclick="deleteOne('${k}')">Delete</button></div>`
+            + vals.map((v,i)=>`<div class="sub-row"><strong>Q${i+1} ${labels[i]}:</strong> ${v}</div>`).join('');
+          list.appendChild(div);
+        } catch(e){ /* skip bad entries */ }
+      }
+    } catch(e){ list.innerHTML='<div class="empty-state">Could not load submissions.</div>'; }
+  }
+
+  async function deleteOne(key){
+    if(!confirm('Delete this submission?')) return;
+    try { await window.storage.delete(key, true); loadSubmissions(); } catch(e){}
+  }
+
+  async function clearAll(){
+    if(!confirm('Delete ALL submissions? This cannot be undone.')) return;
+    try {
+      const keys = await window.storage.list('submission:', true);
+      for(const k of (keys.keys||[])) await window.storage.delete(k, true);
+      loadSubmissions();
+    } catch(e){}
+  }
+
+  async function exportCSV(){
+    try {
+      const keys = await window.storage.list('submission:', true);
+      const all = keys.keys || [];
+      if(!all.length){ alert('No submissions to export.'); return; }
+      const headers = ['Timestamp','Q1 Usage Duration','Q2 Modules','Q3 Overall Satisfaction','Q4 NPS','Q5 Operational Impact','Q6 Ease of Use','Q7 AI Features','Q8 Speed/Reliability','Q9 Reporting','Q10 Onboarding','Q11 Support','Q12 Training Materials','Q13 Likes','Q14 Improvements','Q15 Additional Comments'];
+      const rows = [headers];
+      for(const k of all){
+        const r = await window.storage.get(k, true);
+        const d = JSON.parse(r.value);
+        rows.push([d.timestamp,d.q1,d.q2,d.q3,d.q4,d.q5,d.q6,d.q7,d.q8,d.q9,d.q10,d.q11,d.q12,`"${(d.q13||'').replace(/"/g,'""')}"`,`"${(d.q14||'').replace(/"/g,'""')}"`,`"${(d.q15||'').replace(/"/g,'""')}"`]);
+      }
+      const csv = rows.map(r=>r.join(',')).join('\n');
+      const blob = new Blob([csv],{type:'text/csv'});
+      const a = document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download='stock68_survey_responses.csv';
+      a.click();
+    } catch(e){ alert('Export failed.'); }
+  }
+
+  function toggleAdmin(){
+    const p = document.getElementById('admin-panel');
+    const open = p.classList.toggle('open');
+    if(open) loadSubmissions();
+  }
+
+  loadSubmissions();
+</script>
+</body>
+</html>
